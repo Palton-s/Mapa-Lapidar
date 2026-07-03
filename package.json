@@ -1,0 +1,10 @@
+{
+  "name": "mapa-ilustrado-unb",
+  "version": "1.0.0",
+  "description": "Mapa interativo da UnB com prédios posicionáveis, hover e tour 360.",
+  "private": true,
+  "scripts": {
+    "dev": "npx --yes live-server --port=8000 --ignore=assets/360",
+    "start": "npx --yes live-server --port=8000"
+  }
+}

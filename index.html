@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mapa Ilustrado — UnB</title>
+
+  <!-- Visualizador 360 (Pannellum, via CDN) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" />
+
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Barra superior -->
+  <header class="topbar">
+    <div class="topbar__title">
+      <span class="dot"></span>
+      Mapa Ilustrado <strong>UnB</strong>
+    </div>
+    <div class="topbar__actions">
+      <button id="btnEdit" class="btn" type="button" title="Mostrar coordenadas e arrastar para posicionar">
+        📍 Posicionar
+      </button>
+      <button id="btnHelp" class="btn btn--ghost" type="button" title="Ajuda">?</button>
+    </div>
+  </header>
+
+  <!-- Conteúdo: barra lateral + mapa -->
+  <div class="content">
+
+    <!-- Barra lateral: lista de lugares -->
+    <aside class="sidebar">
+      <h2 class="sidebar__title">Onde estou?</h2>
+      <p class="sidebar__hint">Selecione seu local para traçar a rota até o CEAD.</p>
+      <ul id="placeList" class="sidebar__list"></ul>
+    </aside>
+
+    <!-- Área do mapa -->
+    <main id="map" class="map">
+      <svg id="overlay" class="overlay" xmlns="http://www.w3.org/2000/svg"></svg>
+
+      <!-- Controles de zoom -->
+      <div class="toolbar">
+        <button id="btnZoomIn"  class="tool" type="button" title="Aproximar">＋</button>
+        <button id="btnZoomOut" class="tool" type="button" title="Afastar">－</button>
+        <button id="btnReset"   class="tool" type="button" title="Resetar visão">⤾</button>
+      </div>
+
+      <!-- Leitura de coordenadas (modo edição) -->
+      <div id="hud" class="hud" hidden></div>
+    </main>
+
+  </div>
+
+  <!-- Tooltip de hover -->
+  <div id="tooltip" class="tooltip" hidden></div>
+
+  <!-- Modal do tour 360 -->
+  <div id="tourModal" class="modal" hidden>
+    <div class="modal__bar">
+      <span id="tourTitle" class="modal__title"></span>
+      <button id="tourClose" class="modal__close" type="button">✕</button>
+    </div>
+    <div id="panorama" class="modal__pano"></div>
+  </div>
+
+  <!-- Ajuda -->
+  <div id="helpModal" class="modal modal--center" hidden>
+    <div class="help">
+      <div class="help__head">
+        <strong>Como usar</strong>
+        <button id="helpClose" class="modal__close" type="button">✕</button>
+      </div>
+      <ul>
+        <li><b>Arrastar</b> o mapa: mover a visão. <b>Scroll</b>: zoom.</li>
+        <li><b>Passar o mouse</b> num prédio: mostra nome + descrição e cresce (scale).</li>
+        <li><b>Clicar</b> num ponto <b>360°</b> (ou prédio com panorama): abre o tour de drone.</li>
+        <li><b>📍 Posicionar:</b> mostra a coordenada do mouse em tempo real (canto inferior direito). Clique para copiar. Arraste um prédio para ver o x/y dele ao vivo e anotar.</li>
+        <li>Coloque sua imagem em <code>assets/mapa.png</code> e as 360 em <code>assets/360/</code>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Pannellum + código -->
+  <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/map.js"></script>
+</body>
+</html>
