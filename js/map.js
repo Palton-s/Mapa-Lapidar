@@ -22,7 +22,7 @@ let routeGraph = null;                      // grafo dos caminhos (PATHS)
 
 // DEBUG: mostra pontos vermelhos nos nós do grafo de caminhos (PATHS),
 // com o número de cada nó. Deixe false para esconder.
-const DEBUG_PATHS = true;
+const DEBUG_PATHS = false;
 let currentViewer = null;                   // instância do Pannellum
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
