@@ -172,6 +172,22 @@ body.edit-on #network { display: inline; }
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
 }
+
+/* ---------- DEBUG: nós do grafo de caminhos ---------- */
+.path-debug-node {
+  fill: #ff2d2d;
+  stroke: #3a0000;
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.path-debug-label {
+  fill: #ff6b6b;
+  font: 700 11px ui-monospace, monospace;
+  paint-order: stroke;
+  stroke: #241a30;
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
 .overlay {
   position: absolute;
   inset: 0;
@@ -327,6 +343,35 @@ body.edit-on #network { display: inline; }
   height: 100%; display: flex; align-items: center; justify-content: center;
   text-align: center; color: var(--muted); padding: 24px;
 }
+
+/* ---------- Setas de navegação entre cenas 360 (estilo Street View) ---------- */
+.pano-arrow { cursor: pointer; }
+.pano-arrow__icon {
+  color: #fff;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 2px 7px rgba(0,0,0,.75));
+  opacity: .92;
+  transition: transform .12s ease, opacity .12s;
+}
+.pano-arrow:hover .pano-arrow__icon {
+  transform: translate(-50%, -50%) scale(1.2);
+  opacity: 1;
+}
+.pano-arrow__label {
+  position: absolute;
+  left: 50%; top: 16px;
+  transform: translateX(-50%);
+  background: rgba(20,12,28,.88);
+  color: #fff;
+  font: 600 12px system-ui;
+  padding: 4px 9px;
+  border-radius: 7px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .12s;
+}
+.pano-arrow:hover .pano-arrow__label { opacity: 1; }
 
 .help {
   width: min(520px, 92vw);

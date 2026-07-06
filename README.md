@@ -10,8 +10,14 @@ mapa_ilustrado_unb/
 ├─ index.html
 ├─ css/style.css
 ├─ js/
-│  ├─ config.js   ← VOCÊ EDITA AQUI (prédios, pontos 360, tamanho do mapa)
-│  └─ map.js      ← motor (não precisa mexer)
+│  ├─ config/            ← VOCÊ EDITA AQUI (um arquivo por finalidade)
+│  │  ├─ mapa.js         ← imagem de fundo e tamanho do mapa
+│  │  ├─ calibracao.js   ← georreferenciamento (GEO_REF) + escala (MAP_SCALE)
+│  │  ├─ cores.js        ← paleta de cores
+│  │  ├─ caminhos.js     ← caminhos/calçadas para as rotas (PATHS)
+│  │  ├─ locais.js       ← prédios / departamentos (BUILDINGS)
+│  │  └─ tour360.js      ← pontos de tour 360° (TOUR_POINTS)
+│  └─ map.js             ← motor (não precisa mexer)
 └─ assets/
    ├─ mapa.png    ← coloque sua imagem de fundo aqui
    └─ 360/        ← coloque suas fotos 360 equirretangulares aqui
@@ -26,7 +32,7 @@ então use um servidor local. Recomendado — recarrega sozinho ao salvar:
 npm run dev
 ```
 Abre o navegador em http://localhost:8000 e, toda vez que você salvar um
-arquivo (`config.js`, `css`, etc.), a página recarrega sozinha.
+arquivo (qualquer um em `js/config/`, `css`, etc.), a página recarrega sozinha.
 
 Alternativas:
 - Extensão **Live Server** do VS Code (botão "Go Live") — também tem reload.
@@ -41,11 +47,11 @@ Alternativas:
   - mostra a **posição do mouse em tempo real** (canto inferior direito);
   - **clique** no mapa para copiar a coordenada (x, y);
   - **arraste** um prédio/ponto para ver o **x/y (e tamanho/ângulo) dele ao vivo**
-    e anotar no `js/config.js`. (O arraste é só visual, não grava nada.)
+    e anotar no arquivo certo em `js/config/`. (O arraste é só visual, não grava nada.)
 
 ## Adicionar um prédio
 
-Em `js/config.js`, adicione um objeto em `BUILDINGS`:
+Em `js/config/locais.js`, adicione um objeto em `BUILDINGS`:
 
 ```js
 {
@@ -63,5 +69,12 @@ Em `js/config.js`, adicione um objeto em `BUILDINGS`:
 
 ## Tour 360 com várias cenas
 
-Cada foto 360 é uma cena. Para "andar" entre elas, use `hotSpots` no ponto
-(ver exemplo comentado em `js/config.js`), chamando `openTourByPanorama(...)`.
+Cada foto 360 é uma cena. Para "andar" entre elas (setas estilo Street View),
+use o campo `links` no ponto, em `js/config/tour360.js`:
+
+```js
+links: [
+  { to: "tour-0669", yaw: 0, label: "Próxima cena" },  // seta pra frente
+  { to: "tour-0667", yaw: 180, label: "Voltar" },       // seta pra trás
+]
+```

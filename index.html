@@ -83,7 +83,16 @@
 
   <!-- Pannellum + código -->
   <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
-  <script src="js/config.js"></script>
+
+  <!-- Configuração (um arquivo por finalidade — carregar ANTES do map.js) -->
+  <script src="js/config/mapa.js"></script>
+  <script src="js/config/calibracao.js"></script>
+  <script src="js/config/cores.js"></script>
+  <script src="js/config/caminhos.js"></script>
+  <script src="js/config/locais.js"></script>
+  <script src="js/config/tour360.js"></script>
+
+  <!-- Motor -->
   <script src="js/map.js"></script>
 </body>
 </html>

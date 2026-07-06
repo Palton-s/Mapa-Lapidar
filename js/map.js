@@ -17,8 +17,12 @@ const tourTitle = $("tourTitle");
 // ---- Estado -------------------------------------------------
 const view = { scale: 1, tx: 0, ty: 0 };   // zoom/pan da cena
 let editMode = false;
-let scene, gBuildings, gTours, gRoute, gNetwork;  // grupos SVG
+let scene, gBuildings, gTours, gRoute, gNetwork, gPathDebug;  // grupos SVG
 let routeGraph = null;                      // grafo dos caminhos (PATHS)
+
+// DEBUG: mostra pontos vermelhos nos nós do grafo de caminhos (PATHS),
+// com o número de cada nó. Deixe false para esconder.
+const DEBUG_PATHS = true;
 let currentViewer = null;                   // instância do Pannellum
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
@@ -223,12 +227,14 @@ function buildScene() {
   gNetwork   = el("g", { id: "network" }, scene); // rede de caminhos (só no editor)
   gRoute     = el("g", { id: "route" }, scene);   // rota fica acima dos prédios
   gTours     = el("g", { id: "tours" }, scene);
+  gPathDebug = el("g", { id: "pathdebug" }, scene); // pontos de debug (por cima)
 
   BUILDINGS.forEach((b) => gBuildings.appendChild(renderBuilding(b)));
   TOUR_POINTS.forEach((tp) => gTours.appendChild(renderTour(tp)));
 
   routeGraph = buildRouteGraph();   // monta o grafo dos caminhos
   renderNetwork();                  // desenha a rede (visível no modo Posicionar)
+  renderPathDebug();                // pontos vermelhos de debug (DEBUG_PATHS)
   buildSidebar();
   applyView();
 }
@@ -266,8 +272,12 @@ function renderPartShape(place, part, b) {
   const h = parseSize(part.height);
   if (part.svg) {
     // Centraliza o desenho numa caixa w×h em torno de (0,0).
+    // O "color" define o currentColor: SVGs que usam fill="currentColor"
+    // (ou stroke="currentColor") herdam o DOURADO do prédio automaticamente.
     const wrap = el("g", {
       transform: `translate(${-w / 2} ${-h / 2})`,
+      color: buildingGold(b),
+      fill: buildingGold(b),
     }, place);
     wrap.innerHTML = part.svg;
     // Se o conteúdo for um <svg> completo (com viewBox), FORÇAMOS o tamanho
@@ -526,6 +536,21 @@ function computeRoute(from, to) {
   return [from, ...mid, to];
 }
 
+// DEBUG: pontos vermelhos nos nós do grafo (os pontos usados no cálculo
+// de trajetória, JÁ com os cruzamentos fundidos). O número é o índice do nó.
+function renderPathDebug() {
+  if (!gPathDebug) return;
+  gPathDebug.innerHTML = "";
+  if (!DEBUG_PATHS || !routeGraph) return;
+  routeGraph.nodes.forEach((p, i) => {
+    el("circle", { class: "path-debug-node", cx: p.x, cy: p.y, r: 5 }, gPathDebug);
+    const t = el("text", {
+      class: "path-debug-label", x: p.x + 7, y: p.y - 6,
+    }, gPathDebug);
+    t.textContent = i;
+  });
+}
+
 // Desenha a rede de caminhos (fica visível só no modo "Posicionar").
 function renderNetwork() {
   if (!gNetwork) return;
@@ -747,25 +772,66 @@ overlay.addEventListener("keydown", (e) => {
 // ============================================================
 //  TOUR 360 (Pannellum)
 // ============================================================
-function openTour(data) {
+function openTour(data, initialYaw) {
   tourTitle.textContent = data.name || "Tour 360°";
   tourModal.hidden = false;
+  // Destroi o visualizador anterior (importante ao pular de cena em cena).
+  if (currentViewer) { try { currentViewer.destroy(); } catch (_) {} currentViewer = null; }
   panoramaEl.innerHTML = "";
 
   if (window.pannellum) {
-    currentViewer = pannellum.viewer("panorama", {
+    const cfg = {
       type: "equirectangular",
       panorama: data.panorama,
       autoLoad: true,
       showZoomCtrl: true,
       compass: false,
-      hotSpots: data.hotSpots || [],
-    });
+      hotSpots: (data.hotSpots || []).concat(buildSceneArrows(data)),
+    };
+    if (initialYaw != null) cfg.yaw = initialYaw;   // mantém a direção ao trocar de cena
+    currentViewer = pannellum.viewer("panorama", cfg);
   } else {
     panoramaEl.innerHTML =
       "<div class='pano-fallback'>Não foi possível carregar o visualizador 360.<br>" +
       "Verifique a conexão com a internet (Pannellum vem por CDN).</div>";
   }
+}
+
+// Gera as SETAS de navegação (estilo Street View) a partir de data.links.
+// Cada link: { to: "tour-0669", yaw: 90, pitch?, label? }.
+function buildSceneArrows(data) {
+  const links = data.links || [];
+  return links.map((link) => {
+    const target = byId(TOUR_POINTS, link.to) || byId(BUILDINGS, link.to);
+    if (!target || !target.panorama) return null;
+    return {
+      pitch: link.pitch != null ? link.pitch : -18,   // aponta pro "chão"
+      yaw: link.yaw || 0,
+      cssClass: "pano-arrow",
+      createTooltipFunc: makeArrow,
+      createTooltipArgs: link.label || target.name || link.to,
+      clickHandlerFunc: () => {
+        // Preserva a direção olhada, dando sensação de caminhada contínua.
+        const yaw = currentViewer ? currentViewer.getYaw() : 0;
+        openTour(target, yaw);
+      },
+    };
+  }).filter(Boolean);
+}
+
+// Constrói o elemento visual da seta dentro do panorama.
+function makeArrow(hotSpotDiv, label) {
+  hotSpotDiv.classList.add("pano-arrow");
+  const icon = document.createElement("div");
+  icon.className = "pano-arrow__icon";
+  icon.innerHTML =
+    "<svg viewBox='0 0 24 24' width='54' height='54'><path fill='currentColor'" +
+    " d='M12 3l7 8h-4v10h-6V11H5z'/></svg>";
+  hotSpotDiv.appendChild(icon);
+  const tip = document.createElement("div");
+  tip.className = "pano-arrow__label";
+  tip.textContent = label;
+  hotSpotDiv.appendChild(tip);
 }
 function closeTour() {
   if (currentViewer) { try { currentViewer.destroy(); } catch (_) {} currentViewer = null; }
