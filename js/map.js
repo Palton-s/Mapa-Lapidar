@@ -857,6 +857,7 @@ function openTour(data, initialYaw) {
       autoLoad: true,
       showZoomCtrl: true,
       compass: false,
+      strings: { loadingLabel: "Carregando..." },   // texto exibido durante o carregamento
       hotSpots: (data.hotSpots || []).concat(buildSceneArrows(data)),
     };
     if (initialYaw != null) cfg.yaw = initialYaw;   // mantém a direção ao trocar de cena
