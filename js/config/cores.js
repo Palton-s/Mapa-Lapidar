@@ -15,4 +15,14 @@ const PALETTE = {
   rosa:     "#f472b6",
   ciano:    "#38bdf8",
   cinza:    "#8595b0",
+
+  // Vários tons de DOURADO (base HSL ≈ 42°, 92%). Use color: "amarelo_3"
+  // etc. em locais.js para variar a luminosidade/matiz entre os prédios.
+  amarelo_1: "hsl(39 92% 62%)",
+  amarelo_2: "hsl(41 92% 66%)",
+  amarelo_3: "hsl(42 92% 70%)",   // dourado "padrão" (#FDD06A)
+  amarelo_4: "hsl(43 92% 74%)",
+  amarelo_5: "hsl(45 92% 78%)",
+  amarelo_6: "hsl(40 88% 58%)",
+  amarelo_7: "hsl(44 95% 82%)",
 };

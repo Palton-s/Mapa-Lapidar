@@ -46,6 +46,20 @@ function buildingGold(b) {
   return `hsl(${42 + dh} 92% ${70 + dl}%)`;
 }
 
+// Sorteia uma cor da PALETTE para o prédio, de forma DETERMINÍSTICA:
+// o mesmo prédio (mesmo id) recebe sempre a mesma cor a cada recarga.
+// Ficam de fora os tons de dourado (chaves "amarelo*"), para dar mais
+// variedade. É usado quando o prédio não define um "color" próprio.
+function randomBuildingColor(b) {
+  const pal = (typeof PALETTE !== "undefined") ? PALETTE : {};
+  const keys = Object.keys(pal).filter(k => !/^amarelo/i.test(k));
+  if (!keys.length) return buildingGold(b);
+  const key = (b && (b.id || b.name)) ? String(b.id || b.name) : "x";
+  let seed = 0;
+  for (let i = 0; i < key.length; i++) seed = (seed * 31 + key.charCodeAt(i)) & 0x7fffffff;
+  return pal[keys[seed % keys.length]];
+}
+
 // Cria um elemento SVG com atributos.
 function el(tag, attrs = {}, parent) {
   const node = document.createElementNS(SVGNS, tag);
@@ -274,10 +288,11 @@ function renderPartShape(place, part, b) {
     // Centraliza o desenho numa caixa w×h em torno de (0,0).
     // O "color" define o currentColor: SVGs que usam fill="currentColor"
     // (ou stroke="currentColor") herdam o DOURADO do prédio automaticamente.
+    const partColor = b.color ? resolveColor(b.color) : randomBuildingColor(b);
     const wrap = el("g", {
       transform: `translate(${-w / 2} ${-h / 2})`,
-      color: buildingGold(b),
-      fill: buildingGold(b),
+      color: partColor,
+      fill: partColor,
     }, place);
     wrap.innerHTML = part.svg;
     // Se o conteúdo for um <svg> completo (com viewBox), FORÇAMOS o tamanho
@@ -298,7 +313,7 @@ function renderPartShape(place, part, b) {
     el("rect", {
       class: "shape", x: -w / 2, y: -h / 2,
       width: w, height: h, rx, ry: rx,
-      fill: buildingGold(b),
+      fill: b.color ? resolveColor(b.color) : randomBuildingColor(b),
     }, place);
   }
 }
@@ -491,7 +506,54 @@ function buildRouteGraph() {
       prev = idx;
     }
   }
+
+  // Costura os PEDAÇOS SOLTOS da rede: se um caminho não encosta (a <15m)
+  // em nenhum outro, ele vira uma "ilha" e não dá pra chegar nela pela rede
+  // (o Dijkstra desiste e a rota vira uma linha reta). Aqui a gente liga cada
+  // ilha à rede principal pela aresta mais curta possível (o par de nós mais
+  // próximo entre componentes diferentes), até tudo ficar conectado.
+  connectComponents(nodes, adj, addEdge);
+
   return { nodes, adj };
+}
+
+// Retorna, para cada nó, o número da COMPONENTE conexa a que ele pertence.
+function graphComponents(adj) {
+  const N = adj.length;
+  const comp = Array(N).fill(-1);
+  let nc = 0;
+  for (let i = 0; i < N; i++) {
+    if (comp[i] !== -1) continue;
+    const stack = [i]; comp[i] = nc;
+    while (stack.length) {
+      const u = stack.pop();
+      for (const e of adj[u]) if (comp[e.to] === -1) { comp[e.to] = nc; stack.push(e.to); }
+    }
+    nc++;
+  }
+  return { comp, count: nc };
+}
+
+// Enquanto houver mais de uma "ilha", acha o par de nós mais próximo entre
+// ilhas diferentes e cria uma aresta ali (a costura mais curta). Repete até
+// sobrar uma única componente conexa.
+function connectComponents(nodes, adj, addEdge) {
+  const N = nodes.length;
+  if (N < 2) return;
+  let { comp, count } = graphComponents(adj);
+  while (count > 1) {
+    let ba = -1, bb = -1, bd = Infinity;
+    for (let i = 0; i < N; i++) {
+      for (let j = i + 1; j < N; j++) {
+        if (comp[i] === comp[j]) continue;
+        const d = Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
+        if (d < bd) { bd = d; ba = i; bb = j; }
+      }
+    }
+    if (ba < 0) break;              // nada a ligar (segurança)
+    addEdge(ba, bb);
+    ({ comp, count } = graphComponents(adj));
+  }
 }
 
 // Nó mais próximo de um ponto.
@@ -533,6 +595,10 @@ function computeRoute(from, to) {
   const t = nearestNode(routeGraph, to);
   const mid = shortestPath(routeGraph, s, t);
   if (!mid || !mid.length) return [from, to];
+  // Mostra no console a SEQUÊNCIA dos números dos nós percorridos
+  // (os mesmos índices exibidos nas bolinhas de debug).
+  const seq = mid.map((p) => routeGraph.nodes.indexOf(p));
+  console.log("Sequência do caminho (nós):", seq.join(" → "));
   return [from, ...mid, to];
 }
 
@@ -702,7 +768,12 @@ overlay.addEventListener("pointerup", (e) => {
     const data = kind === "building"
       ? byId(BUILDINGS, downNode.dataset.id)
       : byId(TOUR_POINTS, downNode.dataset.id);
-    if (!editMode && data && data.panorama) openTour(data);
+    if (!editMode && kind === "building" && data) {
+      // Clicou num prédio -> já traça a rota até o CEAD (e enquadra).
+      selectPlace(data.id);
+    } else if (!editMode && data && data.panorama) {
+      openTour(data);
+    }
   } else if (editMode) {
     copyCoord(e);       // clicou no mapa vazio no modo edição -> copia coord
   }
