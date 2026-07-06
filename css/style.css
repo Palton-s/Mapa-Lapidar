@@ -233,6 +233,53 @@ body.edit-on #network { display: inline; }
   100% { transform: scale(1.6); opacity: 0; }
 }
 
+/* ---------- Destaque do prédio de destino (CEAD) ---------- */
+/* Contorno branco + brilho dourado constante na forma do prédio. */
+.building--dest .shape {
+  stroke: #fff;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 5px var(--accent))
+          drop-shadow(0 0 12px var(--accent))
+          drop-shadow(0 3px 8px rgba(0,0,0,.35));
+}
+.building--dest:hover .shape {
+  filter: drop-shadow(0 0 6px var(--accent))
+          drop-shadow(0 0 16px var(--accent))
+          drop-shadow(0 5px 11px rgba(0,0,0,.4));
+}
+
+/* Marcador (pin + anéis) — não intercepta cliques. */
+.dest-marker { pointer-events: none; }
+
+/* Anéis pulsantes ("radar") saindo do prédio. */
+.dest-halo {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 3;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: destHalo 2.4s ease-out infinite;
+}
+.dest-halo--2 { animation-delay: 1.2s; }
+@keyframes destHalo {
+  0%   { transform: scale(.5); opacity: .85; }
+  100% { transform: scale(3.4); opacity: 0; }
+}
+
+/* Pin dourado flutuante com leve balanço. */
+.dest-pin {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: destBob 1.7s ease-in-out infinite;
+  filter: drop-shadow(0 4px 4px rgba(0,0,0,.4));
+}
+.dest-pin__body { fill: var(--accent); stroke: #2a1f38; stroke-width: 1.5; }
+.dest-pin__star { fill: #2a1f38; font: 700 18px system-ui; user-select: none; }
+@keyframes destBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
 /* ---------- Toolbar de zoom ---------- */
 .toolbar {
   position: absolute;

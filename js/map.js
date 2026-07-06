@@ -17,7 +17,7 @@ const tourTitle = $("tourTitle");
 // ---- Estado -------------------------------------------------
 const view = { scale: 1, tx: 0, ty: 0 };   // zoom/pan da cena
 let editMode = false;
-let scene, gBuildings, gTours, gRoute, gNetwork, gPathDebug;  // grupos SVG
+let scene, gBuildings, gTours, gRoute, gNetwork, gPathDebug, gDestMarker;  // grupos SVG
 let routeGraph = null;                      // grafo dos caminhos (PATHS)
 
 // DEBUG: mostra pontos vermelhos nos nós do grafo de caminhos (PATHS),
@@ -48,11 +48,12 @@ function buildingGold(b) {
 
 // Sorteia uma cor da PALETTE para o prédio, de forma DETERMINÍSTICA:
 // o mesmo prédio (mesmo id) recebe sempre a mesma cor a cada recarga.
-// Ficam de fora os tons de dourado (chaves "amarelo*"), para dar mais
-// variedade. É usado quando o prédio não define um "color" próprio.
+// Usa APENAS os tons de dourado/amarelo (chaves "amarelo*"), para todos os
+// prédios ficarem na mesma família de cor, com uma leve variação entre eles.
+// É usado quando o prédio não define um "color" próprio.
 function randomBuildingColor(b) {
   const pal = (typeof PALETTE !== "undefined") ? PALETTE : {};
-  const keys = Object.keys(pal).filter(k => !/^amarelo/i.test(k));
+  const keys = Object.keys(pal).filter(k => /^amarelo/i.test(k));
   if (!keys.length) return buildingGold(b);
   const key = (b && (b.id || b.name)) ? String(b.id || b.name) : "x";
   let seed = 0;
@@ -241,6 +242,7 @@ function buildScene() {
   gNetwork   = el("g", { id: "network" }, scene); // rede de caminhos (só no editor)
   gRoute     = el("g", { id: "route" }, scene);   // rota fica acima dos prédios
   gTours     = el("g", { id: "tours" }, scene);
+  gDestMarker= el("g", { id: "destmarker" }, scene); // pin do destino: acima de tudo
   gPathDebug = el("g", { id: "pathdebug" }, scene); // pontos de debug (por cima)
 
   BUILDINGS.forEach((b) => gBuildings.appendChild(renderBuilding(b)));
@@ -336,6 +338,33 @@ function renderBuilding(b) {
     }, hover);
     renderPartShape(place, part, b);
   });
+
+  // DESTAQUE do prédio de destino (CEAD): pin dourado com estrela + anéis
+  // pulsantes ("radar"), para o usuário identificar de longe onde é. Fica
+  // FORA do .hoverbox (não escala junto no hover) e sem capturar cliques.
+  if (b.id === DEST_ID) {
+    g.classList.add("building--dest");
+    const c = getCenter(b);
+    if (c && gDestMarker) {
+      // Vai no grupo do TOPO (gDestMarker), para o pin ficar acima dos
+      // prédios E dos marcadores 360.
+      const marker = el("g", { class: "dest-marker", transform: `translate(${c.x} ${c.y})` }, gDestMarker);
+      // Tamanho ~constante na tela (contra-escala do zoom, igual aos tours).
+      const s = el("g", { class: "tour__scale" }, marker);
+      // Grupo de ESCALA do pin (ancorado em 0,0 = ponta do pin no prédio).
+      // Aumente/diminua o "scale(...)" para deixar o pin maior/menor.
+      const inner = el("g", { transform: "scale(1.7)" }, s);
+      el("circle", { class: "dest-halo", r: 16 }, inner);
+      el("circle", { class: "dest-halo dest-halo--2", r: 16 }, inner);
+      const pin = el("g", { class: "dest-pin" }, inner);
+      el("path", { class: "dest-pin__body",
+        d: "M0 0 C -9 -16 -16 -22 -16 -33 A 16 16 0 1 1 16 -33 C 16 -22 9 -16 0 0 Z" }, pin);
+      const star = el("text", {
+        class: "dest-pin__star", x: 0, y: -27, "text-anchor": "middle",
+      }, pin);
+      star.textContent = "★";
+    }
+  }
   return g;
 }
 
@@ -644,9 +673,11 @@ function applyView() {
 // o mapa cresce e os pontos se afastam, mas o marcador não incha (fica
 // relativamente menor, ajudando a separar pontos próximos).
 function updateTourScale() {
-  if (!gTours) return;
+  if (!scene) return;
   const k = 1 / view.scale;
-  gTours.querySelectorAll(".tour__scale").forEach((g) => {
+  // Vale para os marcadores 360 (gTours) e também para o pin do destino,
+  // que fica em gBuildings — por isso varremos a cena inteira.
+  scene.querySelectorAll(".tour__scale").forEach((g) => {
     g.setAttribute("transform", `scale(${k})`);
   });
 }
