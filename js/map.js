@@ -246,7 +246,11 @@ function buildScene() {
   gPathDebug = el("g", { id: "pathdebug" }, scene); // pontos de debug (por cima)
 
   BUILDINGS.forEach((b) => gBuildings.appendChild(renderBuilding(b)));
-  TOUR_POINTS.forEach((tp) => gTours.appendChild(renderTour(tp)));
+  // Só desenha no mapa os pontos de tour com onMap !== false. Pontos
+  // escondidos (onMap: false) continuam acessíveis por dentro do tour,
+  // navegando pelas setas (links) — só não ganham marcador no mapa.
+  TOUR_POINTS.filter((tp) => tp.onMap !== false)
+    .forEach((tp) => gTours.appendChild(renderTour(tp)));
 
   routeGraph = buildRouteGraph();   // monta o grafo dos caminhos
   renderNetwork();                  // desenha a rede (visível no modo Posicionar)
@@ -255,13 +259,51 @@ function buildScene() {
   applyView();
 }
 
-// Quantos pixels vale 1 metro, a partir da calibração MAP_SCALE.
+// Quantos pixels vale 1 metro, calculado a partir dos PRÓPRIOS pontos do
+// GEO_REF (a mesma fonte usada para posicionar os prédios). Assim o tamanho
+// e a posição sempre usam a MESMA escala, e nunca ficam dessincronizados
+// depois de uma recalibração. Faz a média entre todos os pares de pontos
+// (mais robusto que usar só dois).
+function geoRefPxPerMeter() {
+  const refs = (typeof GEO_REF !== "undefined") ? GEO_REF : [];
+  refs.forEach(normalizeLatLng);
+  const valid = refs.filter((r) => r.lat != null && r.lng != null && r.x != null && r.y != null);
+  if (valid.length < 2) return null;
+
+  const lat0 = valid[0].lat;
+  const M_PER_DEG_LAT = 110540;
+  const M_PER_DEG_LNG = 111320 * Math.cos(lat0 * Math.PI / 180);
+  const toMeters = (lat, lng) => ({
+    E: (lng - valid[0].lng) * M_PER_DEG_LNG,
+    N: (lat0 - lat) * M_PER_DEG_LAT,
+  });
+
+  let sum = 0, count = 0;
+  for (let i = 0; i < valid.length; i++) {
+    for (let j = i + 1; j < valid.length; j++) {
+      const a = valid[i], b = valid[j];
+      const ma = toMeters(a.lat, a.lng), mb = toMeters(b.lat, b.lng);
+      const distM = Math.hypot(mb.E - ma.E, mb.N - ma.N);
+      const distPx = Math.hypot(b.x - a.x, b.y - a.y);
+      if (distM > 0 && distPx > 0) { sum += distPx / distM; count++; }
+    }
+  }
+  return count > 0 ? sum / count : null;
+}
+
+// Quantos pixels vale 1 metro. Prioridade:
+//   1) Calculado a partir do GEO_REF (sempre consistente com as posições).
+//   2) MAP_SCALE, como calibração manual de reserva (ex.: sem GEO_REF).
+//   3) Valor aproximado, caso nada esteja configurado.
 function pxPerMeter() {
+  const fromGeoRef = geoRefPxPerMeter();
+  if (fromGeoRef) return fromGeoRef;
+
   if (typeof MAP_SCALE !== "undefined" && MAP_SCALE && MAP_SCALE.meters > 0) {
     const d = Math.hypot(MAP_SCALE.ax - MAP_SCALE.bx, MAP_SCALE.ay - MAP_SCALE.by);
     if (d > 0) return d / MAP_SCALE.meters;
   }
-  return 0.4688;   // fallback aproximado, caso MAP_SCALE não exista
+  return 0.4688;   // fallback aproximado, caso nada esteja configurado
 }
 
 // Interpreta um tamanho: número = pixels; "30m" = metros; "40"/"40px" = pixels.
@@ -893,11 +935,33 @@ function openTour(data, initialYaw) {
     };
     if (initialYaw != null) cfg.yaw = initialYaw;   // mantém a direção ao trocar de cena
     currentViewer = pannellum.viewer("panorama", cfg);
+    setupYawReadout();   // clique no panorama -> mostra o ângulo (calibração das setas)
   } else {
     panoramaEl.innerHTML =
       "<div class='pano-fallback'>Não foi possível carregar o visualizador 360.<br>" +
       "Verifique a conexão com a internet (Pannellum vem por CDN).</div>";
   }
+}
+
+// Ferramenta de calibração: clique em qualquer ponto do panorama para ver,
+// na tela, o YAW (0..360°) e o PITCH daquele ponto. Use esse valor no campo
+// "yaw" das setas (links) em tour360.js até a seta apontar pro lugar certo.
+function setupYawReadout() {
+  const readout = $("panoYawReadout");
+  if (!readout || !panoramaEl) return;
+  readout.hidden = true;
+  // Remove listener antigo (evita empilhar handlers ao trocar de cena).
+  panoramaEl.onclick = (e) => {
+    if (!currentViewer || e.target.closest(".pano-arrow")) return;
+    const coords = currentViewer.mouseEventToCoords(e);
+    if (!coords) return;
+    const pitch = Math.round(coords[0]);
+    let yaw = Math.round(coords[1]);
+    if (yaw < 0) yaw += 360;                 // normaliza pra 0..360
+    readout.textContent = `yaw: ${yaw}°   pitch: ${pitch}°`;
+    readout.hidden = false;
+    console.log(`[tour360] clique -> yaw: ${yaw}°  pitch: ${pitch}°`);
+  };
 }
 
 // Gera as SETAS de navegação (estilo Street View) a partir de data.links.
@@ -940,6 +1004,8 @@ function closeTour() {
   if (currentViewer) { try { currentViewer.destroy(); } catch (_) {} currentViewer = null; }
   panoramaEl.innerHTML = "";
   tourModal.hidden = true;
+  const readout = $("panoYawReadout");
+  if (readout) readout.hidden = true;
 }
 // Usado por hotSpots que trocam de cena (ver exemplo no config.js).
 function openTourByPanorama(path) {

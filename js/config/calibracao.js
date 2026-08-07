@@ -28,19 +28,27 @@
 //  Obs.: aqui o x/y é o CENTRO do ponto no seu mapa (mesma convenção
 //  dos prédios). Escala resultante ≈ 2,12 m/px (consistente em x e y).
 const GEO_REF = [
-  { nome: "balao1", lat: -15.759219085236897, lng: -47.86790093049296, x: 856,  y: 138 },
-  { nome: "balao2", lat: -15.763386388836198, lng: -47.86477470552754, x: 1013, y: 356 },
-  { nome: "balao3", lat: -15.768186668164441, lng: -47.86827274259501, x: 836,  y: 607 },
+  { nome: "balao1", lat: -15.759219085236897, lng: -47.86790093049296, x: 883, y: 390, },
+  { nome: "balao2", lat: -15.763386388836198, lng: -47.86477470552754, x: 970, y: 510, },
+  { nome: "balao3", lat: -15.768186668164441, lng: -47.86827274259501, x: 873, y: 648, },
 ];
 
 // ------------------------------------------------------------
 //  ESCALA (metros -> pixels)
 // ------------------------------------------------------------
 //  Permite informar o tamanho dos prédios em METROS além de pixels.
-//  Basta dizer dois pontos do mapa e a distância REAL entre eles.
 //  Com isso, em qualquer prédio você pode escrever, por exemplo:
 //     width: "30m", height: "18m"     (em metros)
 //     width: 40,    height: 20        (em pixels, como antes)
+//
+//  IMPORTANTE: com GEO_REF tendo 2+ pontos (acima), a escala metros->pixels
+//  é calculada AUTOMATICAMENTE a partir deles — a mesma calibração que
+//  posiciona os prédios também dimensiona o tamanho deles, então os dois
+//  nunca ficam dessincronizados. O MAP_SCALE abaixo só é usado como
+//  calibração manual de RESERVA (se o GEO_REF não existir ou tiver menos
+//  de 2 pontos). Se você mantiver os dois, não precisa se preocupar em
+//  manter o MAP_SCALE atualizado — ele fica ignorado enquanto o GEO_REF
+//  estiver presente.
 // ------------------------------------------------------------
 const MAP_SCALE = {
   ax: 855, ay: 140,     // ponto A (pixels)

@@ -420,6 +420,21 @@ body.edit-on #network { display: inline; }
 }
 .pano-arrow:hover .pano-arrow__label { opacity: 1; }
 
+/* ---------- Leitor de yaw/pitch (calibração das setas) ---------- */
+.pano-yaw-readout {
+  position: absolute;
+  left: 50%; bottom: 18px;
+  transform: translateX(-50%);
+  background: rgba(20,12,28,.88);
+  color: #fff;
+  font: 600 13px/1 ui-monospace, monospace;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  pointer-events: none;
+  z-index: 5;
+}
+
 .help {
   width: min(520px, 92vw);
   background: var(--panel);
