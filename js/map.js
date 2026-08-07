@@ -1001,6 +1001,11 @@ function buildSceneArrows(data) {
 // Constrói o elemento visual da seta dentro do panorama.
 function makeArrow(hotSpotDiv, label) {
   hotSpotDiv.classList.add("pano-arrow");
+  // Anel pulsante (mesma ideia do marcador de tour no mapa), pra chamar
+  // atenção pra seta.
+  const pulse = document.createElement("div");
+  pulse.className = "pano-arrow__pulse";
+  hotSpotDiv.appendChild(pulse);
   const icon = document.createElement("div");
   icon.className = "pano-arrow__icon";
   icon.innerHTML =

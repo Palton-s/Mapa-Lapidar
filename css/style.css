@@ -393,6 +393,22 @@ body.edit-on #network { display: inline; }
 
 /* ---------- Setas de navegação entre cenas 360 (estilo Street View) ---------- */
 .pano-arrow { cursor: pointer; }
+/* Anel pulsante atrás do ícone — mesma animação do marcador de tour no mapa. */
+.pano-arrow__pulse {
+  position: absolute;
+  left: 0; top: 0;   /* mesma origem (0,0) que o ícone usa antes do translate */
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  background: var(--panel-2);
+  opacity: .35;
+  pointer-events: none;
+  animation: panoArrowPulse 2s ease-out infinite;
+}
+@keyframes panoArrowPulse {
+  0%   { transform: translate(-50%, -50%) scale(.6); opacity: .5; }
+  70%  { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+  100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+}
 .pano-arrow__icon {
   color: var(--panel-2);
   transform: translate(-50%, -50%);
