@@ -394,7 +394,7 @@ body.edit-on #network { display: inline; }
 /* ---------- Setas de navegação entre cenas 360 (estilo Street View) ---------- */
 .pano-arrow { cursor: pointer; }
 .pano-arrow__icon {
-  color: #fff;
+  color: var(--panel-2);
   transform: translate(-50%, -50%);
   filter: drop-shadow(0 2px 7px rgba(0,0,0,.75));
   opacity: .92;

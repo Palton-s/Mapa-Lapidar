@@ -916,7 +916,7 @@ overlay.addEventListener("keydown", (e) => {
 // ============================================================
 //  TOUR 360 (Pannellum)
 // ============================================================
-function openTour(data, initialYaw) {
+function openTour(data, initialYaw, initialPitch) {
   tourTitle.textContent = data.name || "Tour 360°";
   tourModal.hidden = false;
   // Destroi o visualizador anterior (importante ao pular de cena em cena).
@@ -933,7 +933,12 @@ function openTour(data, initialYaw) {
       strings: { loadingLabel: "Carregando..." },   // texto exibido durante o carregamento
       hotSpots: (data.hotSpots || []).concat(buildSceneArrows(data)),
     };
-    if (initialYaw != null) cfg.yaw = initialYaw;   // mantém a direção ao trocar de cena
+    if (initialYaw != null) cfg.yaw = initialYaw;       // mantém a direção ao trocar de cena
+    if (initialPitch != null) cfg.pitch = initialPitch; // (ou a chegada calibrada de uma seta específica)
+    // initialYaw/initialPitch da CENA têm prioridade: força essa cena a
+    // sempre abrir olhando pra esse ângulo, mesmo vindo de outra seta.
+    if (data.initialYaw != null) cfg.yaw = data.initialYaw;
+    if (data.initialPitch != null) cfg.pitch = data.initialPitch;
     currentViewer = pannellum.viewer("panorama", cfg);
     setupYawReadout();   // clique no panorama -> mostra o ângulo (calibração das setas)
   } else {
@@ -965,7 +970,10 @@ function setupYawReadout() {
 }
 
 // Gera as SETAS de navegação (estilo Street View) a partir de data.links.
-// Cada link: { to: "tour-0669", yaw: 90, pitch?, label? }.
+// Cada link: { to: "tour-0669", yaw: 90, pitch?, label?, arriveYaw?, arrivePitch? }.
+//   arriveYaw/arrivePitch -> (opcional) força a cena de DESTINO a abrir
+//   olhando pra esse ângulo especificamente quando se chega por ESTA seta
+//   (ao contrário de initialYaw/initialPitch da cena, que vale sempre).
 function buildSceneArrows(data) {
   const links = data.links || [];
   return links.map((link) => {
@@ -978,6 +986,10 @@ function buildSceneArrows(data) {
       createTooltipFunc: makeArrow,
       createTooltipArgs: link.label || target.name || link.to,
       clickHandlerFunc: () => {
+        if (link.arriveYaw != null) {
+          openTour(target, link.arriveYaw, link.arrivePitch);
+          return;
+        }
         // Preserva a direção olhada, dando sensação de caminhada contínua.
         const yaw = currentViewer ? currentViewer.getYaw() : 0;
         openTour(target, yaw);
