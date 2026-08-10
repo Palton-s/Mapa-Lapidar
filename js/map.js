@@ -417,10 +417,11 @@ function renderTour(t) {
   const gs = el("g", { class: "tour__scale" }, gp);
   el("circle", { class: "tour__pulse", r: 23 }, gs);
   el("circle", { class: "tour__dot",   r: 15 }, gs);
-  const label = el("text", {
-    class: "tour__icon", x: 0, y: 4, "text-anchor": "middle",
+  const icon = el("image", {
+    class: "tour__icon", x: -11, y: -11, width: 22, height: 22,
+    href: "assets/icons8-visao-360-50.png",
   }, gs);
-  label.textContent = "360";
+  icon.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", "assets/icons8-visao-360-50.png");
   return g;
 }
 
@@ -940,14 +941,18 @@ function openTourByPanorama(path) {
 $("tourClose").onclick = closeTour;
 tourModal.addEventListener("click", (e) => { if (e.target === tourModal) closeTour(); });
 
-// ---- Botão "Conheça o Lapidar" -------------------------------
+// ---- Botão "Veja o interior do Lapidar" -----------------------
 // Abre direto o tour 360 do LAPIDAR (id em tour360.js), sem precisar
 // achar o marcador no mapa.
 const LAPIDAR_TOUR_ID = "tour-0671";
-$("btnLapidar").onclick = () => {
+function goToLapidar() {
   const t = byId(TOUR_POINTS, LAPIDAR_TOUR_ID);
   if (t && t.panorama) openTour(t);
-};
+}
+$("btnLapidar").onclick = goToLapidar;
+// Mesmo atalho, agora DENTRO do modal — aparece em toda cena 360, pra
+// quem está passeando pelo tour ir direto pro laboratório.
+$("btnTourLapidar").onclick = goToLapidar;
 
 // ---- Ajuda --------------------------------------------------
 $("btnHelp").onclick   = () => { $("helpModal").hidden = false; };

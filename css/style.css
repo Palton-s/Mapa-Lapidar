@@ -71,6 +71,8 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .btn:active { transform: translateY(1px); }
 .btn--ghost { width: 38px; padding: 8px 0; text-align: center; }
 .btn--sm { padding: 5px 10px; font-size: 12px; }
+.btn--icon { display: inline-flex; align-items: center; gap: 8px; }
+.btn--icon img { display: block; flex: 0 0 auto; }
 
 /* ---------- Conteúdo (mapa) ---------- */
 .content {
@@ -148,7 +150,7 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 /* ---------- Pontos de tour 360 ---------- */
 .tour { cursor: pointer; outline: none; }
 .tour__dot   { fill: var(--accent-2); stroke: #2a1f38; stroke-width: 2; }
-.tour__icon  { fill: #2a1f38; font: 700 12px system-ui; user-select: none; }
+.tour__icon  { pointer-events: none; }
 .tour__pulse { fill: var(--accent-2); opacity: .35; transform-box: fill-box; transform-origin: center;
   animation: pulse 2s ease-out infinite; }
 .tour:hover .hoverbox,
@@ -332,6 +334,7 @@ body { display: flex; flex-direction: column; overflow: hidden; }
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 16px; background: var(--panel); border-bottom: 1px solid var(--line);
 }
+.modal__bar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .modal__title { font-weight: 600; }
 .modal__close {
   background: transparent; border: none; color: var(--text);

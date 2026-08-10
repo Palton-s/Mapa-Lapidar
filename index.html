@@ -20,7 +20,8 @@
       <span class="dot"></span>
       Mapa Ilustrado <strong>UnB</strong>
     </div>
-    <button id="btnLapidar" class="btn topbar__center" type="button" title="Ver o tour 360° do Lapidar">
+    <button id="btnLapidar" class="btn btn--icon topbar__center" type="button" title="Ver o tour 360° do Lapidar">
+      <img src="assets/icons8-visao-360-50.png" alt="" width="20" height="20" />
       Veja o interior do Lapidar
     </button>
     <div class="topbar__actions">
@@ -66,7 +67,13 @@
   <!-- Modal do tour 360 -->
   <div id="tourModal" class="modal" hidden>
     <div class="modal__bar">
-      <span id="tourTitle" class="modal__title"></span>
+      <div class="modal__bar-left">
+        <span id="tourTitle" class="modal__title"></span>
+        <button id="btnTourLapidar" class="btn btn--sm btn--icon" type="button" title="Ir para o interior do laboratório">
+          <img src="assets/icons8-visao-360-50.png" alt="" width="16" height="16" />
+          Ver interior do laboratório
+        </button>
+      </div>
       <button id="tourClose" class="modal__close" type="button">✕</button>
     </div>
     <div id="panorama" class="modal__pano"></div>
