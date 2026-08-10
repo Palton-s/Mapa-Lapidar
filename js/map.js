@@ -753,12 +753,13 @@ overlay.addEventListener("pointermove", (e) => {
   if (panning && downPt) {
     if (Math.hypot(e.clientX - downPt.x, e.clientY - downPt.y) > MOVE_THRESHOLD)
       moved = true;
-    // move em pixels de tela -> unidades da viewBox (considera o letterbox)
-    const r = overlay.getBoundingClientRect();
-    const renderScale = Math.min(r.width / MAP_CONFIG.width, r.height / MAP_CONFIG.height);
-    const k = 1 / renderScale;
-    view.tx += (e.clientX - lastPan.x) * k;
-    view.ty += (e.clientY - lastPan.y) * k;
+    // move em pixels de tela -> unidades da imagem, usando o CTM atual
+    // (mesma conversão do zoomAt/toImageCoords — sempre correta, não
+    // importa o ajuste do viewBox nem o tamanho do bloco na tela).
+    const before = toImageCoords(lastPan.x, lastPan.y);
+    const after = toImageCoords(e.clientX, e.clientY);
+    view.tx += (after.x - before.x) * view.scale;
+    view.ty += (after.y - before.y) * view.scale;
     applyView();
   }
   lastPan = { x: e.clientX, y: e.clientY };

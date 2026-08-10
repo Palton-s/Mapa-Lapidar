@@ -45,6 +45,10 @@ body { display: flex; flex-direction: column; overflow: hidden; }
   left: 50%; top: 50%;
   transform: translate(-50%, -50%);
 }
+/* .btn:active (transform: translateY(1px)) tem mais especificidade e
+   sobrescreveria o translate(-50%,-50%) inteiro, fazendo o botão "pular"
+   pra fora do centro ao clicar. Reaplica os dois efeitos juntos aqui. */
+.topbar__center.btn:active { transform: translate(-50%, calc(-50% + 1px)); }
 .topbar__title { font-size: 16px; letter-spacing: .2px; display: flex; align-items: center; gap: 10px; }
 .topbar__title strong { color: var(--accent); }
 .topbar__title .dot {
