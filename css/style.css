@@ -62,60 +62,11 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .btn--ghost { width: 38px; padding: 8px 0; text-align: center; }
 .btn--sm { padding: 5px 10px; font-size: 12px; }
 
-/* ---------- Conteúdo (sidebar + mapa) ---------- */
+/* ---------- Conteúdo (mapa) ---------- */
 .content {
   flex: 1 1 auto;
   display: flex;
   min-height: 0;
-}
-
-/* ---------- Barra lateral ---------- */
-.sidebar {
-  width: 264px;
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  background: var(--panel);
-  border-right: 1px solid var(--line);
-  overflow: hidden;
-}
-.sidebar__title {
-  margin: 0;
-  padding: 16px 18px 8px;
-  font-size: 18px;
-  letter-spacing: .2px;
-}
-.sidebar__hint {
-  margin: 0;
-  padding: 0 18px 12px;
-  font-size: 12.5px;
-  color: var(--muted);
-  border-bottom: 1px solid var(--line);
-}
-.sidebar__list {
-  list-style: none;
-  margin: 0;
-  padding: 8px;
-  overflow-y: auto;
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.sidebar__item {
-  padding: 9px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  color: var(--text);
-  transition: background .12s;
-  border: 1px solid transparent;
-}
-.sidebar__item:hover { background: var(--panel-2); }
-.sidebar__item--active {
-  background: var(--accent);
-  color: #2a1f38;
-  font-weight: 600;
 }
 
 /* ---------- Mapa ---------- */
@@ -263,6 +214,82 @@ body { display: flex; flex-direction: column; overflow: hidden; }
   box-shadow: var(--shadow);
 }
 .tool:hover { background: var(--panel-2); }
+
+/* ---------- Busca de local (flutuante, embaixo, centralizada) ---------- */
+.place-search {
+  position: fixed;
+  left: 50%; bottom: 20px;
+  transform: translateX(-50%);
+  width: min(420px, calc(100vw - 32px));
+  z-index: 30;
+}
+
+/* Tema escuro do Tom Select, pra combinar com o resto da UI. */
+.place-search .ts-wrapper.single .ts-control,
+.place-search .ts-wrapper .ts-control {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  padding: 11px 18px;
+  color: var(--text);
+}
+.place-search .ts-control input {
+  color: var(--text);
+  font-size: 14px;
+}
+.place-search .ts-control input::placeholder { color: var(--muted); }
+.place-search .ts-wrapper.single .ts-control::after { display: none; }
+.place-search .ts-wrapper.focus .ts-control {
+  border-color: var(--accent-2);
+  box-shadow: var(--shadow), 0 0 0 3px rgba(255,224,140,.18);
+}
+.place-search .ts-dropdown {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  /* Abre pra CIMA do campo (não embaixo): o campo fica colado no rodapé
+     da tela, então um dropdown pra baixo ficaria cortado/escondido. */
+  top: auto;
+  bottom: 100%;
+  margin: 0 0 8px;
+}
+.place-search .ts-dropdown .ts-dropdown-content { padding: 6px; max-height: 260px; }
+.place-search .ts-dropdown [data-selectable],
+.place-search .ts-dropdown .option {
+  padding: 9px 12px;
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+}
+.place-search .ts-dropdown .active { background: var(--panel-2); }
+.place-search .ts-dropdown .ts-dropdown-content .highlight {
+  background: rgba(253,208,106,.35);
+  border-radius: 3px;
+}
+.place-search .ts-wrapper.single.input-active .ts-control,
+.place-search .ts-wrapper .ts-control.focus { background: var(--panel); }
+
+/* ---------- Botão flutuante de Localização ---------- */
+.fab {
+  position: fixed;
+  right: 18px; bottom: 20px;
+  display: flex; align-items: center; gap: 8px;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 11px 18px 11px 14px;
+  font-size: 14px;
+  text-decoration: none;
+  box-shadow: var(--shadow);
+  z-index: 30;
+  transition: background .15s, border-color .15s;
+}
+.fab:hover { background: var(--panel-2); border-color: var(--accent-2); }
+.fab svg { color: var(--accent); flex: 0 0 auto; }
 
 /* ---------- Tooltip ---------- */
 .tooltip {

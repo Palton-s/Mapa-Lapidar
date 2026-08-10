@@ -8,6 +8,9 @@
   <!-- Visualizador 360 (Pannellum, via CDN) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" />
 
+  <!-- Busca de local (Tom Select, via CDN) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" />
+
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -19,21 +22,14 @@
     </div>
     <div class="topbar__actions">
       <button id="btnLapidar" class="btn" type="button" title="Ver o tour 360° do Lapidar">
-        Conheça o Lapidar
+        Interior do Lapidar
       </button>
       <button id="btnHelp" class="btn btn--ghost" type="button" title="Ajuda">?</button>
     </div>
   </header>
 
-  <!-- Conteúdo: barra lateral + mapa -->
+  <!-- Conteúdo: mapa -->
   <div class="content">
-
-    <!-- Barra lateral: lista de lugares -->
-    <aside class="sidebar">
-      <h2 class="sidebar__title">Onde estou?</h2>
-      <p class="sidebar__hint">Selecione seu local para traçar a rota até o CEAD.</p>
-      <ul id="placeList" class="sidebar__list"></ul>
-    </aside>
 
     <!-- Área do mapa -->
     <main id="map" class="map">
@@ -48,6 +44,21 @@
     </main>
 
   </div>
+
+  <!-- Busca de local (flutuante, centralizada embaixo) -->
+  <div class="place-search">
+    <select id="placeSelect" placeholder="Onde estou?"></select>
+  </div>
+
+  <!-- Localização (link externo pro Google Maps) -->
+  <a id="btnLocation" class="fab" type="button" title="Localização"
+     href="https://www.google.com/maps/place/Centro+de+Educa%C3%A7%C3%A3o+a+Dist%C3%A2ncia+e+Tecnologias+Educacionais+(CEAD%2FUnB)/@-15.7717257,-47.868556,17z/data=!4m14!1m7!3m6!1s0x935a3affc7025789:0xce2d618262a3b10f!2sCentro+de+Educa%C3%A7%C3%A3o+a+Dist%C3%A2ncia+e+Tecnologias+Educacionais+(CEAD%2FUnB)!8m2!3d-15.7717309!4d-47.8659811!16s%2Fg%2F11hdb0lmc8!3m5!1s0x935a3affc7025789:0xce2d618262a3b10f!8m2!3d-15.7717309!4d-47.8659811!16s%2Fg%2F11hdb0lmc8?entry=ttu&g_ep=EgoyMDI2MDgwNS4xIKXMDSoASAFQAw%3D%3D"
+     target="_blank" rel="noopener noreferrer">
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+      <path fill="currentColor" d="M12 2C7.86 2 4.5 5.36 4.5 9.5c0 5.25 6.5 11.5 7 12 .5-.5 7-6.75 7-12C18.5 5.36 15.14 2 12 2zm0 10.25a2.75 2.75 0 1 1 0-5.5 2.75 2.75 0 0 1 0 5.5z"/>
+    </svg>
+    <span>Localização</span>
+  </a>
 
   <!-- Tooltip de hover -->
   <div id="tooltip" class="tooltip" hidden></div>
@@ -72,12 +83,16 @@
         <li><b>Arrastar</b> o mapa: mover a visão. <b>Scroll</b>: zoom.</li>
         <li><b>Passar o mouse</b> num prédio: mostra nome + descrição e cresce (scale).</li>
         <li><b>Clicar</b> num ponto <b>360°</b> (ou prédio com panorama): abre o tour de drone.</li>
+        <li><b>Onde estou?</b> (campo embaixo): digite o nome do seu local para traçar a rota até o CEAD.</li>
       </ul>
     </div>
   </div>
 
   <!-- Pannellum + código -->
   <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+
+  <!-- Busca de local (Tom Select, via CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 
   <!-- Configuração (um arquivo por finalidade — carregar ANTES do map.js) -->
   <script src="js/config/mapa.js"></script>

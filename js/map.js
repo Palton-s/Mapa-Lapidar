@@ -250,7 +250,7 @@ function buildScene() {
     .forEach((tp) => gTours.appendChild(renderTour(tp)));
 
   routeGraph = buildRouteGraph();   // monta o grafo dos caminhos
-  buildSidebar();
+  buildPlaceSearch();
   applyView();
 }
 
@@ -438,36 +438,47 @@ function getCenter(b) {
   return n ? { x: sx / n, y: sy / n } : null;
 }
 
-// Monta a lista de lugares na barra lateral.
-function buildSidebar() {
-  const list = document.getElementById("placeList");
-  if (!list) return;
-  list.innerHTML = "";
-  // Ordena por nome; mantém o destino (CEAD) no topo, destacado.
+// Monta o campo de busca flutuante ("Onde estou?") com Tom Select: digita
+// o nome do local e as opções parecidas vão aparecendo, filtradas.
+let placeSelect = null;
+function buildPlaceSearch() {
+  const select = $("placeSelect");
+  if (!select || typeof TomSelect === "undefined") return;
+  // Opção vazia: sem ela, o <select> nativo já vem com o 1º item
+  // selecionado, e o placeholder "Onde estou?" nunca apareceria.
+  select.innerHTML = '<option value=""></option>';
+  // Ordena por nome.
   const places = BUILDINGS.filter((b) => getCenter(b))
     .sort((a, b) => (a.name || a.id).localeCompare(b.name || b.id, "pt"));
 
   places.forEach((b) => {
-    const li = document.createElement("li");
-    li.className = "sidebar__item";
-    li.textContent = b.name || b.id;
-    li.dataset.id = b.id;
-    li.addEventListener("click", () => selectPlace(b.id));
-    list.appendChild(li);
+    const opt = document.createElement("option");
+    opt.value = b.id;
+    opt.textContent = b.name || b.id;
+    select.appendChild(opt);
+  });
+
+  if (placeSelect) placeSelect.destroy();
+  placeSelect = new TomSelect(select, {
+    placeholder: "Onde estou?",
+    maxItems: 1,
+    maxOptions: null,
+    allowEmptyOption: false,
+    onChange: (id) => { if (id) selectPlace(id); },
   });
 }
 
 let selectedPlaceId = null;
 
-// Ação ao clicar num lugar: destaca, centraliza e traça a rota até o CEAD.
+// Ação ao selecionar um lugar: destaca no campo, centraliza e traça a
+// rota até o CEAD.
 function selectPlace(id) {
   const b = byId(BUILDINGS, id);
   if (!b) return;
   selectedPlaceId = id;
 
-  // Destaque na lista.
-  document.querySelectorAll(".sidebar__item").forEach((li) =>
-    li.classList.toggle("sidebar__item--active", li.dataset.id === id));
+  // Reflete a seleção no campo de busca (sem re-disparar o onChange).
+  if (placeSelect && placeSelect.getValue() !== id) placeSelect.setValue(id, true);
 
   const from = getCenter(b);
   const dest = byId(BUILDINGS, DEST_ID);
