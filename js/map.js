@@ -513,9 +513,7 @@ function clearRoute() { if (gRoute) gRoute.innerHTML = ""; }
 // Centraliza um ponto da imagem no meio do mapa, com um dado zoom.
 function focusPoint(p, scale) {
   if (!p) return;
-  // mínimo 1: nunca deixa o zoom voltar abaixo do "preencher a área"
-  // (senão apareceria fundo vazio nas bordas).
-  view.scale = clamp(scale, 1, 10);
+  view.scale = clamp(scale, 0.4, 10);
   view.tx = MAP_CONFIG.width  / 2 - p.x * view.scale;
   view.ty = MAP_CONFIG.height / 2 - p.y * view.scale;
   applyView();
@@ -708,7 +706,7 @@ function toImageCoords(clientX, clientY) {
 
 function zoomAt(clientX, clientY, factor) {
   const before = toImageCoords(clientX, clientY);
-  view.scale = clamp(view.scale * factor, 1, 10);
+  view.scale = clamp(view.scale * factor, 0.4, 10);
   applyView();
   const after = toImageCoords(clientX, clientY);
   view.tx += (after.x - before.x) * view.scale;
