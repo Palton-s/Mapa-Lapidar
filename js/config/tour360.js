@@ -41,20 +41,6 @@ const TOUR_POINTS = [
   // --- CEAD/LAPIDAR: só a entrada (0686) fica marcada no mapa; os demais
   // --- pontos deste trecho só se acessa navegando pelas setas a partir dela.
   {
-    id: "tour-0668",
-    name: "Corredor do CEAD",
-    description: "Corredor do CEAD",
-    latlng: "-15.771768331694098, -47.86575629631583",
-    panorama: "assets/360/DJI_0695.JPG",
-    onMap: false,
-    // EXEMPLO de setas — ajuste os "yaw" olhando cada panorama.
-    links: [
-      { to: "tour-0706", yaw: 0, label: "Frente da Sala da TI" },
-      { to: "tour-0699", yaw: 104, label: "Secretaria" },
-      { to: "tour-0672", yaw: 187, label: "Recepção do CEAD" },
-    ],
-  },
-  {
     id: "tour-0669",
     name: "Frente do Lapidar",
     description: "Frente do Lapidar",
@@ -62,7 +48,6 @@ const TOUR_POINTS = [
     panorama: "assets/360/DJI_0669.JPG",
     onMap: false,
     links: [
-      { to: "tour-0668", yaw: 180, label: "Voltar" },
       { to: "tour-0670", yaw: 96, label: "Entrada do LAPIDAR" },
       { to: "tour-0702", yaw: 1,  label: "Frente do polo Darcy Ribeiro" },
       { to: "tour-0701", yaw: 8,  label: "Copa" },
@@ -100,7 +85,8 @@ const TOUR_POINTS = [
     onMap: false,
     links: [
       { to: "tour-0686", yaw: 180, label: "Frente do CEAD" },
-      { to: "tour-0668", yaw: 12, label: "Corredor do CEAD" },
+      { to: "tour-0699", yaw: 27, label: "Secretaria" },   // AJUSTE o yaw olhando o panorama
+      { to: "tour-0706", yaw: 10, label: "Frente da Sala da TI" },   // AJUSTE o yaw olhando o panorama
     ],
   },
   {
@@ -120,6 +106,7 @@ const TOUR_POINTS = [
     description: "Centro de Vivência",
     latlng: "-15.765267323142597, -47.86918950333259",
     panorama: "assets/360/DJI_0674.JPG",
+    onMap: false,
     links: [
       { to: "tour-0673", yaw: 180, label: "Entrada do ICC sul" },
       { to: "tour-0675", yaw: 0,   label: "Estacionamento ICC sul" },
@@ -131,6 +118,7 @@ const TOUR_POINTS = [
     description: "Estacionamento ICC sul",
     latlng: "-15.765626703001354, -47.86940633672129",
     panorama: "assets/360/DJI_0675.JPG",
+    onMap: false,
     links: [
       { to: "tour-0674", yaw: 180, label: "Voltar" },
       { to: "tour-0676", yaw: 0,   label: "Estacionamento do ICC sul" },
@@ -142,6 +130,7 @@ const TOUR_POINTS = [
     description: "Estacionamento do ICC sul",
     latlng: "-15.766455675368334, -47.868882920931036",
     panorama: "assets/360/DJI_0676.JPG",
+    onMap: false,
     initialYaw: 229, initialPitch: -9,   // sempre abre olhando pra cá
     links: [
       { to: "tour-0678", yaw: 210, label: "Balão do Multiuso 1" },
@@ -154,6 +143,7 @@ const TOUR_POINTS = [
     description: "Estacionamento do ICC sul",
     latlng: "-15.766674666399235, -47.868777613524315",
     panorama: "assets/360/DJI_0677.JPG",
+    onMap: false,
     links: [
       { to: "tour-0676", yaw: 180, label: "Voltar" },
       { to: "tour-0676", yaw: 98, label: "Estacionamento do ICC sul" },
@@ -201,6 +191,7 @@ const TOUR_POINTS = [
     description: "Faculdade de Saúde (FS)",
     latlng: "-15.769966700440024, -47.86695957629646",
     panorama: "assets/360/DJI_0682.JPG",
+    onMap: false,
     links: [
       { to: "tour-0681", yaw: 180, label: "Ponto de ônibus da FS" },
       { to: "tour-0684", yaw: 2,   label: "Balão do CEAD" },
@@ -317,7 +308,7 @@ const TOUR_POINTS = [
     panorama: "assets/360/DJI_0699.JPG",
     onMap: false,   // não aparece no mapa (só acessível navegando pelas setas)
     links: [
-      { to: "tour-0668", yaw: 180, label: "Corredor do CEAD" },   // AJUSTE o yaw olhando o panorama
+      { to: "tour-0672", yaw: 180, label: "Recepção do CEAD" },   // AJUSTE o yaw olhando o panorama
       { to: "tour-0700", yaw: 4, label: "Sala da direção" },
     ],
   },
@@ -391,8 +382,8 @@ const TOUR_POINTS = [
     onMap: false,   // não aparece no mapa (só acessível navegando pelas setas)
     links: [
       { to: "tour-0698", yaw: 0,   label: "Frente da sala da CAC" },   // AJUSTE o yaw olhando o panorama
-      { to: "tour-0668", yaw: 180, label: "Corredor do CEAD" },        // AJUSTE o yaw olhando o panorama
       { to: "tour-0705", yaw: 100, label: "Sala da TI" },
+      { to: "tour-0672", yaw: 180, label: "Recepção do CEAD" },
     ],
   },
   {

@@ -792,6 +792,11 @@ overlay.addEventListener("pointerup", (e) => {
     if (kind === "building" && data) {
       // Clicou num prédio -> já traça a rota até o CEAD (e enquadra).
       selectPlace(data.id);
+      // Prédio com tour vinculado (ex.: CEAD) -> abre a cena direto.
+      if (data.tourId) {
+        const t = byId(TOUR_POINTS, data.tourId);
+        if (t && t.panorama) openTour(t);
+      }
     } else if (data && data.panorama) {
       openTour(data);
     }
@@ -844,7 +849,12 @@ overlay.addEventListener("keydown", (e) => {
   const data = node.dataset.kind === "building"
     ? byId(BUILDINGS, node.dataset.id)
     : byId(TOUR_POINTS, node.dataset.id);
-  if (data && data.panorama) openTour(data);
+  if (data && data.tourId) {
+    const t = byId(TOUR_POINTS, data.tourId);
+    if (t && t.panorama) openTour(t);
+  } else if (data && data.panorama) {
+    openTour(data);
+  }
 });
 
 // ============================================================

@@ -73,6 +73,9 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .btn--sm { padding: 5px 10px; font-size: 12px; }
 .btn--icon { display: inline-flex; align-items: center; gap: 8px; }
 .btn--icon img { display: block; flex: 0 0 auto; }
+/* Ícone preto original com pouco contraste sobre o fundo escuro do topbar:
+   inverte pra branco. */
+.icon-invert { filter: invert(1) brightness(2); }
 
 /* ---------- Conteúdo (mapa) ---------- */
 .content {
@@ -330,12 +333,21 @@ body { display: flex; flex-direction: column; overflow: hidden; }
 .modal[hidden] { display: none; }
 .modal--center { align-items: center; justify-content: center; }
 .modal__bar {
+  position: relative;
   height: 52px; flex: 0 0 auto;
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 16px; background: var(--panel); border-bottom: 1px solid var(--line);
 }
 .modal__bar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .modal__title { font-weight: 600; }
+/* Botão "Ver interior do laboratório" centralizado na barra, igual ao
+   botão do topbar (mesmo truque de position:absolute + translate). */
+.modal__bar-center {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+}
+.modal__bar-center.btn:active { transform: translate(-50%, calc(-50% + 1px)); }
 .modal__close {
   background: transparent; border: none; color: var(--text);
   font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 8px;

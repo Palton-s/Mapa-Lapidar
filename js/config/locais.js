@@ -467,6 +467,9 @@ const BUILDINGS = [
     ],
     // Ao ter panorama, clicar em qualquer parte abre o tour.
     panorama: "assets/360/predio-01.jpg",
+    // Clicar no prédio abre direto essa cena do tour 360° (em vez do
+    // panorama acima, que é só um placeholder).
+    tourId: "tour-0686",
   },
   {
     id: "colina-bloco-a",
