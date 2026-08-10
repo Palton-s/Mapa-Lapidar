@@ -689,7 +689,13 @@ function applyView() {
 // relativamente menor, ajudando a separar pontos próximos).
 function updateTourScale() {
   if (!scene) return;
-  const k = 1 / view.scale;
+  // Precisa desfazer TANTO o zoom interativo (view.scale) QUANTO o ajuste
+  // automático do viewBox pro tamanho do bloco na tela (preserveAspectRatio),
+  // senão os marcadores mudam de tamanho quando o bloco/imagem mudam de
+  // proporção. overlay.getScreenCTM() já dá esse ajuste automático.
+  const ctm = overlay.getScreenCTM();
+  const outerScale = ctm ? ctm.a : 1;
+  const k = 1 / (outerScale * view.scale);
   // Vale para os marcadores 360 (gTours) e também para o pin do destino,
   // que fica em gBuildings — por isso varremos a cena inteira.
   scene.querySelectorAll(".tour__scale").forEach((g) => {
@@ -718,6 +724,11 @@ overlay.addEventListener("wheel", (e) => {
   e.preventDefault();
   zoomAt(e.clientX, e.clientY, e.deltaY < 0 ? 1.12 : 1 / 1.12);
 }, { passive: false });
+
+// Se o bloco do mapa mudar de tamanho (ex.: iframe redimensionado), o
+// ajuste automático do viewBox muda junto — recalcula o contra-zoom dos
+// marcadores 360/destino pra eles não mudarem de tamanho na tela.
+window.addEventListener("resize", () => updateTourScale());
 
 $("btnZoomIn").onclick  = () => zoomCenter(1.2);
 $("btnZoomOut").onclick = () => zoomCenter(1 / 1.2);
