@@ -43,11 +43,6 @@ Alternativas:
 - **Arrastar** o mapa = mover a visão · **Scroll** = zoom.
 - **Passar o mouse** num prédio → mostra nome + descrição e cresce (scale).
 - **Clicar** num ponto **360°** (ou prédio com `panorama`) → abre o tour.
-- **📍 Posicionar** (botão no topo) — para achar coordenadas rápido:
-  - mostra a **posição do mouse em tempo real** (canto inferior direito);
-  - **clique** no mapa para copiar a coordenada (x, y);
-  - **arraste** um prédio/ponto para ver o **x/y (e tamanho/ângulo) dele ao vivo**
-    e anotar no arquivo certo em `js/config/`. (O arraste é só visual, não grava nada.)
 
 ## Adicionar um prédio
 

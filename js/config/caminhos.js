@@ -18,13 +18,10 @@
 //  REDE (pontos que se ligam de várias formas), use VÁRIOS arrays. Onde
 //  dois caminhos têm pontos próximos (< 15m), eles viram um cruzamento.
 //
-//  DICA: ligue o "📍 Posicionar" para VER a rede desenhada por cima do
-//  mapa (linhas tracejadas + bolinhas) e conferir se está ligada certo.
 // ------------------------------------------------------------
 // NUMERAÇÃO DOS PONTOS  ([n] = índice do nó no grafo de rotas)
 // Os números seguem a ordem de leitura (primeiro o caminho de cima inteiro,
-// depois o de baixo). São os MESMOS números que aparecem nas bolinhas de
-// debug do mapa e no console ao traçar uma rota.
+// depois o de baixo).
 // RESSALVA: pontos de caminhos diferentes que ficam a menos de 15m um do
 // outro são FUNDIDOS num único cruzamento — nesse caso os dois compartilham
 // o número do primeiro deles (o segundo não "ganha" um número novo).

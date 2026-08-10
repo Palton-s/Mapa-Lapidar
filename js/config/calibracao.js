@@ -26,11 +26,12 @@
 //    - Quanto mais separados e espalhados os pontos, melhor a precisão.
 // ------------------------------------------------------------
 //  Obs.: aqui o x/y é o CENTRO do ponto no seu mapa (mesma convenção
-//  dos prédios). Escala resultante ≈ 2,12 m/px (consistente em x e y).
+//  dos prédios), em pixels DA IMAGEM (mesmo espaço do MAP_CONFIG.width/
+//  height em mapa.js). Escala resultante ≈ 2,73 m/px (consistente em x e y).
 const GEO_REF = [
-  { nome: "balao1", lat: -15.759219085236897, lng: -47.86790093049296, x: 883, y: 390, },
-  { nome: "balao2", lat: -15.763386388836198, lng: -47.86477470552754, x: 970, y: 510, },
-  { nome: "balao3", lat: -15.768186668164441, lng: -47.86827274259501, x: 873, y: 648, },
+  { nome: "balao1", lat: -15.759219085236897, lng: -47.86790093049296, x: 485.11, y: 550.29, },
+  { nome: "balao2", lat: -15.763386388836198, lng: -47.86477470552754, x: 607.87, y: 719.61, },
+  { nome: "balao3", lat: -15.768186668164441, lng: -47.86827274259501, x: 471.00, y: 914.33, },
 ];
 
 // ------------------------------------------------------------
@@ -51,7 +52,7 @@ const GEO_REF = [
 //  estiver presente.
 // ------------------------------------------------------------
 const MAP_SCALE = {
-  ax: 855, ay: 140,     // ponto A (pixels)
-  bx: 837, by: 607,     // ponto B (pixels)
-  meters: 997,          // distância real entre A e B, em metros
+  ax: 445.6, ay: 197.54,   // ponto A (pixels)
+  bx: 420.21, by: 856.48,  // ponto B (pixels)
+  meters: 997,             // distância real entre A e B, em metros
 };

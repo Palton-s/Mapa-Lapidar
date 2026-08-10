@@ -18,8 +18,8 @@
       Mapa Ilustrado <strong>UnB</strong>
     </div>
     <div class="topbar__actions">
-      <button id="btnEdit" class="btn" type="button" title="Mostrar coordenadas e arrastar para posicionar">
-        📍 Posicionar
+      <button id="btnLapidar" class="btn" type="button" title="Ver o tour 360° do Lapidar">
+        Conheça o Lapidar
       </button>
       <button id="btnHelp" class="btn btn--ghost" type="button" title="Ajuda">?</button>
     </div>
@@ -45,9 +45,6 @@
         <button id="btnZoomOut" class="tool" type="button" title="Afastar">－</button>
         <button id="btnReset"   class="tool" type="button" title="Resetar visão">⤾</button>
       </div>
-
-      <!-- Leitura de coordenadas (modo edição) -->
-      <div id="hud" class="hud" hidden></div>
     </main>
 
   </div>
@@ -62,8 +59,6 @@
       <button id="tourClose" class="modal__close" type="button">✕</button>
     </div>
     <div id="panorama" class="modal__pano"></div>
-    <!-- Calibração das setas: mostra o yaw/pitch do último clique no panorama. -->
-    <div id="panoYawReadout" class="pano-yaw-readout" hidden></div>
   </div>
 
   <!-- Ajuda -->
@@ -77,8 +72,6 @@
         <li><b>Arrastar</b> o mapa: mover a visão. <b>Scroll</b>: zoom.</li>
         <li><b>Passar o mouse</b> num prédio: mostra nome + descrição e cresce (scale).</li>
         <li><b>Clicar</b> num ponto <b>360°</b> (ou prédio com panorama): abre o tour de drone.</li>
-        <li><b>📍 Posicionar:</b> mostra a coordenada do mouse em tempo real (canto inferior direito). Clique para copiar. Arraste um prédio para ver o x/y dele ao vivo e anotar.</li>
-        <li>Coloque sua imagem em <code>assets/mapa.png</code> e as 360 em <code>assets/360/</code>.</li>
       </ul>
     </div>
   </div>

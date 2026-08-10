@@ -31,8 +31,7 @@
 //                   posição/forma: x,y (ou lat,lng), width, height, angle,
 //                   svg, radius. Se "parts" existir, ele substitui o
 //                   x/y/width/height do prédio. Todas as partes reagem
-//                   JUNTAS ao passar o mouse (hover), e no modo edição você
-//                   arrasta cada parte separadamente.
+//                   JUNTAS ao passar o mouse (hover).
 //                   Ex.:
 //                     parts: [
 //                       { x: 820, y: 300, width: 60, height: 30, angle: 10 },
@@ -70,8 +69,8 @@ const BUILDINGS = [
     name: "Instituto Central de Ciências (ICC Sul)",
     description: "Ala sul do Minhocão. Diversos institutos e salas de aula.",
     // Mesma forma duplicada: uma parte em cima e outra embaixo, com um
-    // vão entre elas. Ajuste a distância movendo os x/y (ou arraste cada
-    // parte no modo Posicionar). Aumente a diferença para afastar mais.
+    // vão entre elas. Ajuste a distância movendo os x/y (ou lat/lng) de
+    // cada parte. Aumente a diferença para afastar mais.
     parts: [
       { latlng: "-15.765187662882964, -47.868004601785181", width: "218m", height: "108m", angle: 240, svg: ICC_SUL_SVG },
       { latlng: "-15.765469983119502, -47.868237069174604", width: "227m", height: "113m", angle: 240, svg: ICC_SUL_SVG },
@@ -461,8 +460,7 @@ const BUILDINGS = [
     name: "CEAD ⭐",
     description: "O prédio do CEAD",
     // Exemplo de prédio com VÁRIAS partes: um bloco maior + um anexo.
-    // Passe o mouse: os dois crescem juntos. No modo edição, arraste
-    // cada um separadamente.
+    // Passe o mouse: os dois crescem juntos.
     parts: [
       { latlng: "-15.771910497432854, -47.86577224076018", width: "30m", height: "80m", angle: -30 },
 
@@ -677,7 +675,7 @@ const BUILDINGS = [
     description: "Departamento de Design (DIN).",
     latlng: "-15.76506933986184, -47.86427019874561",
     // TAMANHO NÃO INFORMADO — usei um placeholder de 30x30m. Ajuste width/height
-    // (ou arraste no modo Posicionar) para o tamanho real do prédio.
+    // para o tamanho real do prédio.
     width: "30m", height: "30m",
     angle: 35,
     svg: null,

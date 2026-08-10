@@ -9,20 +9,14 @@ const SVGNS = "http://www.w3.org/2000/svg";
 const $ = (id) => document.getElementById(id);
 const overlay   = $("overlay");
 const tooltip   = $("tooltip");
-const hud       = $("hud");
 const tourModal = $("tourModal");
 const panoramaEl= $("panorama");
 const tourTitle = $("tourTitle");
 
 // ---- Estado -------------------------------------------------
 const view = { scale: 1, tx: 0, ty: 0 };   // zoom/pan da cena
-let editMode = false;
-let scene, gBuildings, gTours, gRoute, gNetwork, gPathDebug, gDestMarker;  // grupos SVG
+let scene, gBuildings, gTours, gRoute, gDestMarker;  // grupos SVG
 let routeGraph = null;                      // grafo dos caminhos (PATHS)
-
-// DEBUG: mostra pontos vermelhos nos nós do grafo de caminhos (PATHS),
-// com o número de cada nó. Deixe false para esconder.
-const DEBUG_PATHS = false;
 let currentViewer = null;                   // instância do Pannellum
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
@@ -215,7 +209,12 @@ function buildScene() {
   const H = MAP_CONFIG.height;
 
   overlay.setAttribute("viewBox", `0 0 ${W} ${H}`);
-  overlay.setAttribute("preserveAspectRatio", "xMidYMid meet");
+  // "slice": a imagem do mapa é bem mais ALTA do que larga (retrato). Como
+  // o bloco do mapa na tela é mais largo do que alto (paisagem), ajustar
+  // pela ALTURA sobraria borda vazia dos dois lados. Com "slice" o ajuste
+  // é sempre pela LARGURA (ela preenche o bloco de ponta a ponta) e o
+  // excesso de altura fica cortado — nunca aparece fundo/grade nas bordas.
+  overlay.setAttribute("preserveAspectRatio", "xMidYMid slice");
 
   scene = el("g", { id: "scene" }, overlay);
 
@@ -239,11 +238,9 @@ function buildScene() {
   img.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", MAP_CONFIG.image);
 
   gBuildings = el("g", { id: "buildings" }, scene);
-  gNetwork   = el("g", { id: "network" }, scene); // rede de caminhos (só no editor)
   gRoute     = el("g", { id: "route" }, scene);   // rota fica acima dos prédios
   gTours     = el("g", { id: "tours" }, scene);
   gDestMarker= el("g", { id: "destmarker" }, scene); // pin do destino: acima de tudo
-  gPathDebug = el("g", { id: "pathdebug" }, scene); // pontos de debug (por cima)
 
   BUILDINGS.forEach((b) => gBuildings.appendChild(renderBuilding(b)));
   // Só desenha no mapa os pontos de tour com onMap !== false. Pontos
@@ -253,8 +250,6 @@ function buildScene() {
     .forEach((tp) => gTours.appendChild(renderTour(tp)));
 
   routeGraph = buildRouteGraph();   // monta o grafo dos caminhos
-  renderNetwork();                  // desenha a rede (visível no modo Posicionar)
-  renderPathDebug();                // pontos vermelhos de debug (DEBUG_PATHS)
   buildSidebar();
   applyView();
 }
@@ -507,7 +502,9 @@ function clearRoute() { if (gRoute) gRoute.innerHTML = ""; }
 // Centraliza um ponto da imagem no meio do mapa, com um dado zoom.
 function focusPoint(p, scale) {
   if (!p) return;
-  view.scale = clamp(scale, 0.4, 10);
+  // mínimo 1: nunca deixa o zoom voltar abaixo do "preencher a área"
+  // (senão apareceria fundo vazio nas bordas).
+  view.scale = clamp(scale, 1, 10);
   view.tx = MAP_CONFIG.width  / 2 - p.x * view.scale;
   view.ty = MAP_CONFIG.height / 2 - p.y * view.scale;
   applyView();
@@ -666,40 +663,7 @@ function computeRoute(from, to) {
   const t = nearestNode(routeGraph, to);
   const mid = shortestPath(routeGraph, s, t);
   if (!mid || !mid.length) return [from, to];
-  // Mostra no console a SEQUÊNCIA dos números dos nós percorridos
-  // (os mesmos índices exibidos nas bolinhas de debug).
-  const seq = mid.map((p) => routeGraph.nodes.indexOf(p));
-  console.log("Sequência do caminho (nós):", seq.join(" → "));
   return [from, ...mid, to];
-}
-
-// DEBUG: pontos vermelhos nos nós do grafo (os pontos usados no cálculo
-// de trajetória, JÁ com os cruzamentos fundidos). O número é o índice do nó.
-function renderPathDebug() {
-  if (!gPathDebug) return;
-  gPathDebug.innerHTML = "";
-  if (!DEBUG_PATHS || !routeGraph) return;
-  routeGraph.nodes.forEach((p, i) => {
-    el("circle", { class: "path-debug-node", cx: p.x, cy: p.y, r: 5 }, gPathDebug);
-    const t = el("text", {
-      class: "path-debug-label", x: p.x + 7, y: p.y - 6,
-    }, gPathDebug);
-    t.textContent = i;
-  });
-}
-
-// Desenha a rede de caminhos (fica visível só no modo "Posicionar").
-function renderNetwork() {
-  if (!gNetwork) return;
-  gNetwork.innerHTML = "";
-  const paths = (typeof PATHS !== "undefined") ? PATHS : [];
-  for (const path of paths) {
-    const pts = path.map(pointToPixel).filter(Boolean);
-    if (pts.length < 2) continue;
-    const d = pts.map((p, i) => (i ? "L" : "M") + p.x + " " + p.y).join(" ");
-    el("path", { class: "net-line", d }, gNetwork);
-    for (const p of pts) el("circle", { class: "net-node", cx: p.x, cy: p.y, r: 4 }, gNetwork);
-  }
 }
 
 // ============================================================
@@ -733,7 +697,7 @@ function toImageCoords(clientX, clientY) {
 
 function zoomAt(clientX, clientY, factor) {
   const before = toImageCoords(clientX, clientY);
-  view.scale = clamp(view.scale * factor, 0.4, 10);
+  view.scale = clamp(view.scale * factor, 1, 10);
   applyView();
   const after = toImageCoords(clientX, clientY);
   view.tx += (after.x - before.x) * view.scale;
@@ -756,11 +720,9 @@ function zoomCenter(factor) {
 }
 
 // ============================================================
-//  INTERAÇÃO (pan, arrastar prédio, abrir tour, pegar coords)
+//  INTERAÇÃO (pan, abrir tour)
 // ============================================================
 let panning = false;
-let dragEl = null;          // {kind, data} sendo arrastado no modo edição
-let dragOffset = { x: 0, y: 0 };
 let downPt = null;          // ponto do pointerdown (tela)
 let downNode = null;        // grupo (prédio/tour) sob o pointerdown
 let lastPan = { x: 0, y: 0 };
@@ -774,39 +736,12 @@ overlay.addEventListener("pointerdown", (e) => {
   lastPan = { x: e.clientX, y: e.clientY };
   moved = false;
   downNode = e.target.closest("[data-id]");
-
-  if (editMode && downNode) {
-    // arrastar o elemento
-    const kind = downNode.dataset.kind;
-    const data = kind === "building"
-      ? byId(BUILDINGS, downNode.dataset.id)
-      : byId(TOUR_POINTS, downNode.dataset.id);
-    // Descobre qual PARTE (grupo .place) do prédio foi tocada, para
-    // arrastar só ela. Em prédio de parte única, é a parte 0.
-    const placeNode = e.target.closest(".place") || downNode.querySelector(".place");
-    const partIdx = (placeNode && placeNode.dataset.part != null)
-      ? +placeNode.dataset.part : 0;
-    const target = kind === "building" ? getParts(data)[partIdx] : data;
-    const p = toImageCoords(e.clientX, e.clientY);
-    dragEl = { kind, data, part: target, place: placeNode, node: downNode };
-    dragOffset = { x: p.x - target.x, y: p.y - target.y };
-  } else {
-    panning = true;
-  }
+  panning = true;
   overlay.setPointerCapture(e.pointerId);
 });
 
 overlay.addEventListener("pointermove", (e) => {
-  if (editMode) updateHud(e);
-
-  if (dragEl) {
-    const p = toImageCoords(e.clientX, e.clientY);
-    dragEl.part.x = Math.round(p.x - dragOffset.x);
-    dragEl.part.y = Math.round(p.y - dragOffset.y);
-    updatePlaceTransform(dragEl);
-    moved = true;
-    showDragHud(dragEl);
-  } else if (panning && downPt) {
+  if (panning && downPt) {
     if (Math.hypot(e.clientX - downPt.x, e.clientY - downPt.y) > MOVE_THRESHOLD)
       moved = true;
     // move em pixels de tela -> unidades da viewBox (considera o letterbox)
@@ -822,15 +757,6 @@ overlay.addEventListener("pointermove", (e) => {
 
 overlay.addEventListener("pointerup", (e) => {
   try { overlay.releasePointerCapture(e.pointerId); } catch (_) {}
-
-  if (dragEl) {
-    const d = dragEl.part;
-    const txt = `x: ${d.x}, y: ${d.y},`;
-    navigator.clipboard?.writeText(txt).catch(() => {});
-    toast(`Copiado → ${txt}`);
-    dragEl = null;
-    return;
-  }
   panning = false;
 
   if (moved) return;   // foi arraste, não clique
@@ -841,28 +767,14 @@ overlay.addEventListener("pointerup", (e) => {
     const data = kind === "building"
       ? byId(BUILDINGS, downNode.dataset.id)
       : byId(TOUR_POINTS, downNode.dataset.id);
-    if (!editMode && kind === "building" && data) {
+    if (kind === "building" && data) {
       // Clicou num prédio -> já traça a rota até o CEAD (e enquadra).
       selectPlace(data.id);
-    } else if (!editMode && data && data.panorama) {
+    } else if (data && data.panorama) {
       openTour(data);
     }
-  } else if (editMode) {
-    copyCoord(e);       // clicou no mapa vazio no modo edição -> copia coord
   }
 });
-
-// Atualiza a transform (posição/rotação) da PARTE arrastada.
-function updatePlaceTransform(item) {
-  const d = item.part;
-  const place = item.place || item.node.querySelector(".place");
-  if (item.kind === "building") {
-    place.setAttribute("transform",
-      `translate(${d.x} ${d.y}) rotate(${d.angle || 0})`);
-  } else {
-    place.setAttribute("transform", `translate(${d.x} ${d.y})`);
-  }
-}
 
 // ============================================================
 //  TOOLTIP (hover)
@@ -889,7 +801,7 @@ function hideTooltip() { tooltip.hidden = true; }
 
 overlay.addEventListener("pointerover", (e) => {
   const node = e.target.closest("[data-id]");
-  if (node && !dragEl && !panning)
+  if (node && !panning)
     showTooltip(node.dataset.kind, node.dataset.id, e);
 });
 overlay.addEventListener("pointerout", (e) => {
@@ -940,33 +852,11 @@ function openTour(data, initialYaw, initialPitch) {
     if (data.initialYaw != null) cfg.yaw = data.initialYaw;
     if (data.initialPitch != null) cfg.pitch = data.initialPitch;
     currentViewer = pannellum.viewer("panorama", cfg);
-    setupYawReadout();   // clique no panorama -> mostra o ângulo (calibração das setas)
   } else {
     panoramaEl.innerHTML =
       "<div class='pano-fallback'>Não foi possível carregar o visualizador 360.<br>" +
       "Verifique a conexão com a internet (Pannellum vem por CDN).</div>";
   }
-}
-
-// Ferramenta de calibração: clique em qualquer ponto do panorama para ver,
-// na tela, o YAW (0..360°) e o PITCH daquele ponto. Use esse valor no campo
-// "yaw" das setas (links) em tour360.js até a seta apontar pro lugar certo.
-function setupYawReadout() {
-  const readout = $("panoYawReadout");
-  if (!readout || !panoramaEl) return;
-  readout.hidden = true;
-  // Remove listener antigo (evita empilhar handlers ao trocar de cena).
-  panoramaEl.onclick = (e) => {
-    if (!currentViewer || e.target.closest(".pano-arrow")) return;
-    const coords = currentViewer.mouseEventToCoords(e);
-    if (!coords) return;
-    const pitch = Math.round(coords[0]);
-    let yaw = Math.round(coords[1]);
-    if (yaw < 0) yaw += 360;                 // normaliza pra 0..360
-    readout.textContent = `yaw: ${yaw}°   pitch: ${pitch}°`;
-    readout.hidden = false;
-    console.log(`[tour360] clique -> yaw: ${yaw}°  pitch: ${pitch}°`);
-  };
 }
 
 // Gera as SETAS de navegação (estilo Street View) a partir de data.links.
@@ -1021,8 +911,6 @@ function closeTour() {
   if (currentViewer) { try { currentViewer.destroy(); } catch (_) {} currentViewer = null; }
   panoramaEl.innerHTML = "";
   tourModal.hidden = true;
-  const readout = $("panoYawReadout");
-  if (readout) readout.hidden = true;
 }
 // Usado por hotSpots que trocam de cena (ver exemplo no config.js).
 function openTourByPanorama(path) {
@@ -1031,53 +919,14 @@ function openTourByPanorama(path) {
 $("tourClose").onclick = closeTour;
 tourModal.addEventListener("click", (e) => { if (e.target === tourModal) closeTour(); });
 
-// ============================================================
-//  MODO EDIÇÃO
-// ============================================================
-$("btnEdit").onclick = () => {
-  editMode = !editMode;
-  document.body.classList.toggle("edit-on", editMode);
-  $("btnEdit").classList.toggle("btn--active", editMode);
-  hud.hidden = !editMode;
-  hud.textContent = editMode ? "mova o mouse…" : "";
+// ---- Botão "Conheça o Lapidar" -------------------------------
+// Abre direto o tour 360 do LAPIDAR (id em tour360.js), sem precisar
+// achar o marcador no mapa.
+const LAPIDAR_TOUR_ID = "tour-0671";
+$("btnLapidar").onclick = () => {
+  const t = byId(TOUR_POINTS, LAPIDAR_TOUR_ID);
+  if (t && t.panorama) openTour(t);
 };
-
-// Coordenada do mouse (em pixels da imagem), em tempo real.
-function updateHud(e) {
-  const p = toImageCoords(e.clientX, e.clientY);
-  hud.textContent = `x: ${Math.round(p.x)}   y: ${Math.round(p.y)}`;
-}
-
-// Enquanto arrasta um elemento, mostra o x/y (e tamanho/ângulo) dele ao vivo.
-function showDragHud(item) {
-  const d = item.part, id = item.data.id;
-  hud.textContent = item.kind === "building"
-    ? `${id}  →  x: ${d.x}  y: ${d.y}   ${d.width}×${d.height}  ${d.angle || 0}°`
-    : `${id}  →  x: ${d.x}  y: ${d.y}`;
-}
-
-// Clique no mapa vazio copia a coordenada.
-function copyCoord(e) {
-  const p = toImageCoords(e.clientX, e.clientY);
-  const txt = `x: ${Math.round(p.x)}, y: ${Math.round(p.y)},`;
-  navigator.clipboard?.writeText(txt).catch(() => {});
-  toast(`Copiado → ${txt}`);
-}
-
-// ---- Toast simples ------------------------------------------
-let toastTimer = null;
-function toast(msg) {
-  let t = $("toast");
-  if (!t) {
-    t = document.createElement("div");
-    t.id = "toast"; t.className = "toast";
-    document.body.appendChild(t);
-  }
-  t.textContent = msg;
-  t.classList.add("toast--show");
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove("toast--show"), 1800);
-}
 
 // ---- Ajuda --------------------------------------------------
 $("btnHelp").onclick   = () => { $("helpModal").hidden = false; };

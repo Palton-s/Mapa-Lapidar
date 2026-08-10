@@ -13,8 +13,10 @@
 const MAP_CONFIG = {
   image: "assets/mapa.png",
 
-  // Coloque aqui o tamanho REAL (em pixels) da sua imagem mapa.png.
-  // Se não souber, deixe assim e ajuste depois — não quebra nada.
-  width: 1600,
-  height: 1000,
+  // Tamanho REAL (em pixels) da imagem assets/mapa.png. TEM que bater com
+  // o tamanho de verdade do arquivo — se ficar diferente, a imagem é
+  // desenhada menor/pillarboxed dentro desse retângulo (sobra fundo/grade
+  // nas bordas). Trocou de imagem? Atualize width/height aqui também.
+  width: 736,
+  height: 1411,
 };
